@@ -1,0 +1,27 @@
+{
+    "name": "record-actions",
+    "version": "0.0.1",
+    "description": "record user actions",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/LoveKino/record-actions.git"
+    },
+    "keywords": [
+        "record",
+        "user",
+        "actions"
+    ],
+    "author": "ddchen",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/LoveKino/record-actions/issues"
+    },
+    "homepage": "https://github.com/LoveKino/record-actions#readme",
+    "dependencies": {
+        "serialize-front": "~0.0.1"
+    }
+}
