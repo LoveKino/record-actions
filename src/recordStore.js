@@ -21,9 +21,16 @@ module.exports = (memory, key, opts) => {
             return recordModel.getModel();
         };
 
+        let updateState = (state, moment) => {
+            recordModel.updateState(state, moment);
+            // save
+            memory.set(key, recordModel.getModel());
+        };
+
         return {
             addAction,
-            getRecordData
+            getRecordData,
+            updateState
         };
     });
 };

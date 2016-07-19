@@ -11,7 +11,7 @@
 
 let ActionCapturer = require('./actionCapturer');
 
-// let recordState = require('./recordState');
+let recordState = require('./recordState');
 
 let RecordStore = require('./recordStore');
 
@@ -32,21 +32,26 @@ module.exports = ({
     refreshId = refreshId || genId();
 
     let record = ({
-        addAction
+        addAction,
+        updateState
     }, actionConfig) => {
         let {
             capture
         } = ActionCapturer(actionConfig);
 
         let accept = (action) => {
+            // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
+
+            updateState(record.getPageState(), 'beforeRecordAction');
             // add action
             addAction(action);
-            // record state
-            // TODO last state problem
-            // historyInfo.actions.push(recordState());
         };
 
         capture(accept);
+
+        recordState.start(50, (state) => {
+            updateState(state);
+        }, 'regular');
     };
 
     let getStore = () => RecordStore(memory, pageInfoKey, {
