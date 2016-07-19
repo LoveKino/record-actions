@@ -11,7 +11,9 @@
 
 let ActionCapturer = require('./actionCapturer');
 
-let processor = require('./processor');
+// let recordState = require('./recordState');
+
+let RecordStore = require('./recordStore');
 
 let {
     genId
@@ -23,79 +25,47 @@ module.exports = ({
     refreshId,
     passData,
     memory,
-    playedTime,
-    actionOpts = {}
+    playedTime
 }) => {
     const pageInfoKey = `${rootId}-pageInfo`;
 
-    let record = (historyInfo, opts) => {
+    refreshId = refreshId || genId();
+
+    let record = ({
+        addAction
+    }, actionConfig) => {
         let {
             capture
-        } = ActionCapturer(opts);
+        } = ActionCapturer(actionConfig);
 
         let accept = (action) => {
-            // tag refreshId
-            action.refreshId = refreshId;
-
-            // tag winId
-            action.winId = winId;
-
-            // tag gap time
-            let prev = historyInfo.actions[historyInfo.actions.length - 1];
-            setGapTime(prev, action, playedTime);
-
-            // process
-            processor(action, historyInfo.actions);
-
-            // add
-            historyInfo.actions.push(action);
-            // sync
-            memory.set(pageInfoKey, historyInfo);
-
-            //
-            actionOpts.accept && actionOpts.accept(action);
+            // add action
+            addAction(action);
+            // record state
+            // TODO last state problem
+            // historyInfo.actions.push(recordState());
         };
 
         capture(accept);
     };
 
+    let getStore = () => RecordStore(memory, pageInfoKey, {
+        winId,
+        playedTime,
+        refreshId
+    });
+
     let getRecordData = () => {
         // get history
-        return memory.get(pageInfoKey).then((historyInfo) => {
-            historyInfo = historyInfo || {
-                actions: []
-            };
-
-            return historyInfo;
+        return getStore().then((store) => {
+            return store.getRecordData();
         });
     };
 
-    let start = () => {
-        let {
-            config
-        } = passData;
-
-        refreshId = refreshId || genId();
-
-        // get history
-        getRecordData().then(historyInfo =>
-            record(historyInfo, config.action)
-        );
-    };
+    let start = () => getStore().then((store) => record(store, passData.config.action));
 
     return {
         start,
         getRecordData
     };
-};
-
-let setGapTime = (prev, cur, playedTime) => {
-    if (!prev) {
-        if (playedTime) {
-            cur.gapTimeToPrev = cur.time - playedTime;
-        }
-    } else {
-        let gap = cur.time - prev.time;
-        cur.gapTimeToPrev = gap;
-    }
 };

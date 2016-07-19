@@ -16,6 +16,7 @@ let getAction = (event) => {
     });
 
     return {
+        type: 'action',
         event: event,
         time: new Date().getTime(),
         attachedUIStates: getAttachedUIStates(node),
