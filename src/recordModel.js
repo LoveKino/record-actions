@@ -84,13 +84,15 @@ module.exports = (historyInfo, {
         } else {
             // update
             let duration = last.duration;
-            let lastState = duration[duration.length - 1] || null;
+            let lastDuration = duration[duration.length - 1] || null;
 
             // TODO diff
-            if (!jsoneq(lastState, state)) {
+            if (!jsoneq(lastDuration && lastDuration.state, state)) {
                 duration.push({
                     state,
-                    moment
+                    moment,
+                    refreshId,
+                    winId
                 });
             }
         }
