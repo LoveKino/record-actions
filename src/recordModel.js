@@ -44,7 +44,8 @@ module.exports = (historyInfo, {
         // add state
         addNode({
             type: 'state',
-            duration: []
+            duration: [],
+            assertion: {}
         });
     };
 
