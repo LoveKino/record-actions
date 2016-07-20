@@ -1,5 +1,7 @@
 'use strict';
 
+let jsoneq = require('cl-jsoneq');
+
 /**
  * encapsulate data structure and logic
  *
@@ -15,7 +17,7 @@ module.exports = (historyInfo, {
     winId
 }) => {
     historyInfo = historyInfo || {
-        actions: []
+        nodes: []
     };
 
     let addAction = (action) => {
@@ -34,18 +36,24 @@ module.exports = (historyInfo, {
         setGapTime(prev, action, playedTime);
 
         // process
-        processor(action, historyInfo.actions);
+        processor(action, historyInfo.nodes);
 
         // add action
         addNode(action);
+
+        // add state
+        addNode({
+            type: 'state',
+            duration: []
+        });
     };
 
     let getLastItem = () => {
-        return historyInfo.actions[historyInfo.actions.length - 1];
+        return historyInfo.nodes[historyInfo.nodes.length - 1];
     };
 
     let getLastActionNode = () => {
-        let list = historyInfo.actions;
+        let list = historyInfo.nodes;
         let index = list.length - 1;
         let item = list[index];
 
@@ -59,7 +67,7 @@ module.exports = (historyInfo, {
         }
     };
 
-    let addNode = (node) => historyInfo.actions.push(node);
+    let addNode = (node) => historyInfo.nodes.push(node);
 
     let updateState = (state, moment) => {
         let last = getLastItem();
@@ -67,7 +75,7 @@ module.exports = (historyInfo, {
             let node = {
                 type: 'state',
                 duration: [{
-                    state, moment
+                    state, moment, refreshId, winId
                 }]
             };
 
@@ -75,10 +83,16 @@ module.exports = (historyInfo, {
             addNode(node);
         } else {
             // update
-            last.duration.push({
-                state,
-                moment
-            });
+            let duration = last.duration;
+            let lastState = duration[duration.length - 1] || null;
+
+            // TODO diff
+            if (!jsoneq(lastState, state)) {
+                duration.push({
+                    state,
+                    moment
+                });
+            }
         }
     };
 

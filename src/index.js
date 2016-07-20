@@ -29,6 +29,7 @@ module.exports = ({
 }) => {
     const pageInfoKey = `${rootId}-pageInfo`;
 
+    // get current page's refreshId
     refreshId = refreshId || genId();
 
     let record = ({
@@ -41,8 +42,7 @@ module.exports = ({
 
         let accept = (action) => {
             // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
-
-            updateState(record.getPageState(), 'beforeRecordAction');
+            updateState(recordState.getPageState(), 'beforeRecordAction');
             // add action
             addAction(action);
         };

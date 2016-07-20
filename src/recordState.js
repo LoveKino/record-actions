@@ -1,34 +1,20 @@
 'use strict';
 
-let jsoneq = require('cl-jsoneq');
-
 /**
  * record state of page
  */
-module.exports = (duration, callback) => {
-    let stateCache = null;
-
+let start = (duration, callback) => {
     let recordState = (duration, callback) => {
         setTimeout(() => {
             let curState = getPageState();
 
-            // only when changed happened
-            // TODO use diff algo
-            if (!jsoneq(curState, stateCache)) {
-                callback && callback(curState);
-                stateCache = curState;
-            }
-
+            callback && callback(curState);
             //
             recordState(duration, callback);
         }, duration);
     };
 
-
-    return {
-        start: () => recordState(duration, callback),
-        getPageState
-    };
+    recordState(duration, callback);
 };
 
 let getPageState = () => {
@@ -37,4 +23,9 @@ let getPageState = () => {
         url: window.location.href,
         cookie: document.cookie
     };
+};
+
+module.exports = {
+    start,
+    getPageState
 };
