@@ -1,5 +1,9 @@
 'use strict';
 
+let {
+    getDisplayText
+} = require('page-text');
+
 /**
  * record state of page
  */
@@ -21,7 +25,9 @@ let getPageState = () => {
     return {
         type: 'state',
         url: window.location.href,
-        cookie: document.cookie
+        cookie: document.cookie,
+        pageText: getDisplayText(document.body),
+        title: document.title
     };
 };
 

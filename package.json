@@ -23,6 +23,7 @@
     "homepage": "https://github.com/LoveKino/record-actions#readme",
     "dependencies": {
         "cl-jsoneq": "0.0.2",
-        "serialize-front": "~0.0.1"
+        "serialize-front": "~0.0.1",
+        "page-text": "~0.0.1"
     }
 }

@@ -109,12 +109,18 @@ module.exports = (historyInfo, {
 };
 
 let setGapTime = (prev, cur, playedTime) => {
+    let gap = getGapTime(prev, cur, playedTime);
+    if (gap !== undefined) {
+        cur.gapTimeToPrev = gap;
+    }
+};
+
+let getGapTime = (prev, cur, playedTime) => {
     if (!prev) {
         if (playedTime) {
-            cur.gapTimeToPrev = cur.time - playedTime;
+            return cur.time - playedTime;
         }
     } else {
-        let gap = cur.time - prev.time;
-        cur.gapTimeToPrev = gap;
+        return cur.time - prev.time;
     }
 };
