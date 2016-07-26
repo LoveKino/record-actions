@@ -54,6 +54,15 @@ module.exports = ({
         }, 'regular');
     };
 
+    let stop = () => {
+        // save current state
+        return getStore().then(({
+            updateState
+        }) => {
+            return updateState(recordState.getPageState(), 'closeWindow');
+        });
+    };
+
     let getStore = () => RecordStore(memory, pageInfoKey, {
         winId,
         playedTime,
@@ -71,6 +80,7 @@ module.exports = ({
 
     return {
         start,
+        stop,
         getRecordData
     };
 };
