@@ -9,7 +9,7 @@
  *      system response
  */
 
-let ActionCapturer = require('./actionCapturer');
+let ActionCapturer = require('capture-action');
 
 let recordState = require('./recordState');
 
