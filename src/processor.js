@@ -16,7 +16,7 @@ module.exports = (action, nodes) => {
 rules.push((action, nodes) => {
     if (action.event.type === 'keyup' &&
         action.event.which === 13) {
-        let prev = nodes[nodes.length - 1];
+        let prev = nodes[nodes.length - 2];
         if (!prev) return;
         if (prev.event.type === 'click') {
             // trigger this event as fast as you can after click event
