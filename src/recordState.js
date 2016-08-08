@@ -10,11 +10,13 @@ let {
 let start = (duration, callback) => {
     let recordState = (duration, callback) => {
         setTimeout(() => {
-            let curState = getPageState();
+            if (document.body) {
+                let curState = getPageState();
 
-            callback && callback(curState);
-            //
-            recordState(duration, callback);
+                callback && callback(curState);
+                //
+                recordState(duration, callback);
+            }
         }, duration);
     };
 
