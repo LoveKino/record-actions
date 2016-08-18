@@ -15,6 +15,8 @@ let recordState = require('./recordState');
 
 let RecordStore = require('./recordStore');
 
+let NodeUnique = require('./nodeUique');
+
 let {
     genId
 } = require('./util');
@@ -32,6 +34,8 @@ module.exports = ({
     // get current page's refreshId
     refreshId = refreshId || genId();
 
+    let nodeUnique = NodeUnique();
+
     let record = ({
         addAction,
         updateState
@@ -40,9 +44,14 @@ module.exports = ({
             capture
         } = ActionCapturer(actionConfig);
 
-        let accept = (action) => {
+        let accept = (action, event) => {
             // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
             updateState(recordState.getPageState(), 'beforeRecordAction');
+            // node flag
+            let id = nodeUnique(event.target);
+
+            action.source.domNodeId = id;
+
             // add action
             addAction(action);
         };

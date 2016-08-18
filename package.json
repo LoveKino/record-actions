@@ -27,6 +27,7 @@
     "link_dependencies": {
         "serialize-front": "~0.0.1",
         "page-text": "~0.0.1",
-        "capture-action": "~0.0.1"
+        "capture-action": "~0.0.1",
+        "bolzano": "~0.0.1"
     }
 }
