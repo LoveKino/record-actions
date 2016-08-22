@@ -27,7 +27,8 @@ module.exports = ({
     refreshId,
     passData,
     memory,
-    playedTime
+    playedTime,
+    continueWinId
 }) => {
     const pageInfoKey = `${rootId}-pageInfo`;
 
@@ -74,6 +75,7 @@ module.exports = ({
 
     let getStore = () => RecordStore(memory, pageInfoKey, {
         winId,
+        continueWinId,
         playedTime,
         refreshId
     });

@@ -11,11 +11,14 @@ let jsoneq = require('cl-jsoneq');
 
 let processor = require('./processor');
 
-module.exports = (historyInfo, {
-    playedTime,
-    refreshId,
-    winId
-}) => {
+module.exports = (historyInfo, opts) => {
+    let {
+        playedTime,
+        refreshId
+    } = opts;
+
+    let winId = opts.continueWinId || opts.winId;
+
     historyInfo = historyInfo || {
         nodes: []
     };
