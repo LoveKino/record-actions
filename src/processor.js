@@ -25,3 +25,12 @@ rules.push((action, nodes) => {
         }
     }
 });
+
+/**
+ * a special situation: blur event may triggered too slow and page may jump, cause bugs
+ */
+rules.push((action) => {
+    if (action.event.type === 'blur') {
+        action.gapTimeToPrev = 1;
+    }
+});
