@@ -55,13 +55,17 @@ module.exports = ({
 
             // add action
             addAction(action);
+
         };
 
-        capture(accept);
-
+        // TODO using observable
+        /*
         recordState.start(50, (state) => {
             updateState(state);
         }, 'regular');
+       */
+
+        capture(accept);
     };
 
     let stop = () => {
@@ -87,11 +91,16 @@ module.exports = ({
         });
     };
 
+    let clearRecordData = () => {
+        return memory.remove(pageInfoKey);
+    };
+
     let start = () => getStore().then((store) => record(store, passData.config.action));
 
     return {
         start,
         stop,
-        getRecordData
+        getRecordData,
+        clearRecordData
     };
 };

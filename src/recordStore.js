@@ -6,15 +6,15 @@
 
 let RecordModel = require('./recordModel');
 
-module.exports = (memory, key, opts) => {
+module.exports = (store, key, opts) => {
     // get history
-    return memory.get(key).then(historyInfo => {
+    return store.get(key).then(historyInfo => {
         let recordModel = RecordModel(historyInfo, opts);
 
         let addAction = (action) => {
             recordModel.addAction(action);
             // save
-            memory.set(key, recordModel.getModel());
+            store.set(key, recordModel.getModel());
         };
 
         let getRecordData = () => {
@@ -22,9 +22,9 @@ module.exports = (memory, key, opts) => {
         };
 
         let updateState = (state, moment) => {
-            recordModel.updateState(state, moment);
+            let ret = recordModel.updateState(state, moment);
             // save
-            memory.set(key, recordModel.getModel());
+            ret && store.set(key, recordModel.getModel());
         };
 
         return {

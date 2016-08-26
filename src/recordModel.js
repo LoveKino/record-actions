@@ -85,6 +85,7 @@ module.exports = (historyInfo, opts) => {
 
             // add new node
             addNode(node);
+            return true;
         } else {
             // update
             let duration = last.duration;
@@ -98,8 +99,10 @@ module.exports = (historyInfo, opts) => {
                     refreshId,
                     winId
                 });
+                return true;
             }
         }
+        return false;
     };
 
     let getModel = () => historyInfo;
