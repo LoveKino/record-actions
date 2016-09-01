@@ -59,11 +59,9 @@ module.exports = ({
         };
 
         // TODO using observable
-        /*
         recordState.start(50, (state) => {
             updateState(state);
         }, 'regular');
-       */
 
         capture(accept);
     };
