@@ -80,7 +80,10 @@ module.exports = (historyInfo, opts) => {
                 type: 'state',
                 duration: [{
                     state, moment, refreshId, winId
-                }]
+                }],
+                externals: {
+                    ajax: []
+                }
             };
 
             // add new node
@@ -105,12 +108,39 @@ module.exports = (historyInfo, opts) => {
         return false;
     };
 
+    let updateAjaxExternal = (ajaxInfoP) => {
+        let last = getLastItem();
+        let ajaxs = [];
+
+        if (!last || last.type === 'action') {
+            let node = {
+                type: 'state',
+                duration: [],
+                externals: {
+                    ajax: ajaxs
+                }
+            };
+
+            // add new node
+            addNode(node);
+        } else {
+            last.externals = last.externals || {};
+            last.externals.ajax = last.externals.ajax || [];
+            ajaxs = last.externals.ajax;
+        }
+
+        return Promise.resolve(ajaxInfoP).then((info) => {
+            ajaxs.push(info);
+        });
+    };
+
     let getModel = () => historyInfo;
 
     return {
         addAction,
         getModel,
-        updateState
+        updateState,
+        updateAjaxExternal
     };
 };
 

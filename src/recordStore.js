@@ -27,10 +27,18 @@ module.exports = (store, key, opts) => {
             ret && store.set(key, recordModel.getModel());
         };
 
+        let updateAjaxExternal = (ajaxInfoP) => {
+            return recordModel.updateAjaxExternal(ajaxInfoP).then(() => {
+                // save
+                store.set(key, recordModel.getModel());
+            });
+        };
+
         return {
             addAction,
             getRecordData,
-            updateState
+            updateState,
+            updateAjaxExternal
         };
     });
 };

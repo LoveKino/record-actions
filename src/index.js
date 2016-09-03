@@ -13,6 +13,8 @@ let ActionCapturer = require('capture-action');
 
 let recordState = require('./recordState');
 
+let recordAjax = require('./recordAjax');
+
 let RecordStore = require('./recordStore');
 
 let NodeUnique = require('./nodeUique');
@@ -39,7 +41,8 @@ module.exports = ({
 
     let record = ({
         addAction,
-        updateState
+        updateState,
+        updateAjaxExternal
     }, actionConfig) => {
         let {
             capture
@@ -55,13 +58,13 @@ module.exports = ({
 
             // add action
             addAction(action);
-
         };
 
         // TODO using observable
-        recordState.start(50, (state) => {
-            updateState(state);
-        }, 'regular');
+        recordState.start(50, updateState, 'regular');
+
+        // recording ajax
+        recordAjax(updateAjaxExternal);
 
         capture(accept);
     };
