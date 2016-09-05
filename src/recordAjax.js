@@ -8,61 +8,62 @@ let {
     forEach
 } = require('bolzano');
 
-let captureCallback = null;
-
 let {
     proxyAjax
 } = ajaxproxy();
 
-let {
-    produce, consume
-} = messageQueue();
+module.exports = () => {
+    let {
+        produce, consume
+    } = messageQueue();
 
-let rootCache = [];
+    let rootCache = [];
 
-proxyAjax({
-    xhr: {
-        proxyOptions: (options) => {
-            let {
-                result, data
-            } = produce({
-                a: 1
-            });
+    let captureCallback = null;
 
-            options.id = data.id;
+    proxyAjax({
+        xhr: {
+            proxyOptions: (options) => {
+                let {
+                    result, data
+                } = produce({
+                    a: 1
+                });
 
-            if (!captureCallback) {
-                rootCache.push(result);
-            } else {
-                captureCallback(result);
-            }
+                options.id = data.id;
 
-            // send point
-            return options;
-        },
-
-        proxyResponse: (response, options) => {
-            consume({
-                id: options.id,
-                data: {
-                    options,
-                    response
+                if (!captureCallback) {
+                    rootCache.push(result);
+                } else {
+                    captureCallback(result);
                 }
-            });
-            return response;
+
+                // send point
+                return options;
+            },
+
+            proxyResponse: (response, options) => {
+                consume({
+                    id: options.id,
+                    data: {
+                        options,
+                        response
+                    }
+                });
+                return response;
+            }
         }
-    }
-});
+    });
 
+    return (callback) => {
+        if (!captureCallback) {
+            captureCallback = callback;
 
-module.exports = (callback) => {
-    if (!captureCallback) {
-        captureCallback = callback;
-
-        forEach(rootCache, (result) => {
-            captureCallback(result);
-        });
-    } else {
-        captureCallback = callback;
-    }
+            forEach(rootCache, (result) => {
+                captureCallback(result);
+            });
+        } else {
+            captureCallback = callback;
+        }
+    };
 };

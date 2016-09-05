@@ -13,7 +13,7 @@ let ActionCapturer = require('capture-action');
 
 let recordState = require('./recordState');
 
-let recordAjax = require('./recordAjax');
+let RecordAjax = require('./recordAjax');
 
 let RecordStore = require('./recordStore');
 
@@ -24,84 +24,93 @@ let {
 } = require('./util');
 
 module.exports = ({
-    winId,
-    rootId,
-    refreshId,
-    passData,
-    memory,
-    playedTime,
-    continueWinId
-}) => {
-    const pageInfoKey = `${rootId}-pageInfo`;
+    doRecordAjax = true
+} = {}) => {
+    let recordAjax = null;
+    if (doRecordAjax) {
+        recordAjax = RecordAjax();
+    }
 
-    // get current page's refreshId
-    refreshId = refreshId || genId();
+    return ({
+        winId,
+        rootId,
+        refreshId,
+        passData,
+        memory,
+        playedTime,
+        continueWinId
+    }) => {
+        const pageInfoKey = `${rootId}-pageInfo`;
 
-    let nodeUnique = NodeUnique();
+        // get current page's refreshId
+        refreshId = refreshId || genId();
 
-    let record = ({
-        addAction,
-        updateState,
-        updateAjaxExternal
-    }, actionConfig) => {
-        let {
-            capture
-        } = ActionCapturer(actionConfig);
+        let nodeUnique = NodeUnique();
 
-        let accept = (action, event) => {
-            // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
-            updateState(recordState.getPageState(), 'beforeRecordAction');
-            // node flag
-            let id = nodeUnique(event.target);
+        let record = ({
+            addAction,
+            updateState,
+            updateAjaxExternal
+        }, actionConfig) => {
+            let {
+                capture
+            } = ActionCapturer(actionConfig);
 
-            action.source.domNodeId = id;
+            let accept = (action, event) => {
+                // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
+                updateState(recordState.getPageState(), 'beforeRecordAction');
+                // node flag
+                let id = nodeUnique(event.target);
 
-            // add action
-            addAction(action);
+                action.source.domNodeId = id;
+
+                // add action
+                addAction(action);
+            };
+
+            // TODO using observable
+            recordState.start(50, updateState, 'regular');
+
+            // recording ajax
+            recordAjax && recordAjax(updateAjaxExternal);
+
+            capture(accept);
         };
 
-        // TODO using observable
-        recordState.start(50, updateState, 'regular');
+        let stop = () => {
+            // save current state
+            return getStore().then(({
+                updateState
+            }) => {
+                return updateState(recordState.getPageState(), 'closeWindow');
+            });
+        };
 
-        // recording ajax
-        recordAjax(updateAjaxExternal);
-
-        capture(accept);
-    };
-
-    let stop = () => {
-        // save current state
-        return getStore().then(({
-            updateState
-        }) => {
-            return updateState(recordState.getPageState(), 'closeWindow');
+        let getStore = () => RecordStore(memory, pageInfoKey, {
+            winId,
+            continueWinId,
+            playedTime,
+            refreshId
         });
-    };
 
-    let getStore = () => RecordStore(memory, pageInfoKey, {
-        winId,
-        continueWinId,
-        playedTime,
-        refreshId
-    });
+        let getRecordData = () => {
+            // get history
+            return getStore().then((store) => {
+                return store.getRecordData();
+            });
+        };
 
-    let getRecordData = () => {
-        // get history
-        return getStore().then((store) => {
-            return store.getRecordData();
-        });
-    };
+        let clearRecordData = () => {
+            return memory.remove(pageInfoKey);
+        };
 
-    let clearRecordData = () => {
-        return memory.remove(pageInfoKey);
-    };
+        let start = () => getStore().then((store) => record(store, passData.config.action));
 
-    let start = () => getStore().then((store) => record(store, passData.config.action));
-
-    return {
-        start,
-        stop,
-        getRecordData,
-        clearRecordData
+        return {
+            start,
+            stop,
+            getRecordData,
+            clearRecordData
+        };
     };
 };
