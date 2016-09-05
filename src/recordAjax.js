@@ -4,41 +4,65 @@ let ajaxproxy = require('ajaxproxy');
 
 let messageQueue = require('consume-queue');
 
-module.exports = (callback) => {
-    let {
-        proxyAjax
-    } = ajaxproxy();
-    let {
-        produce, consume
-    } = messageQueue();
+let {
+    forEach
+} = require('bolzano');
 
-    proxyAjax({
-        xhr: {
-            proxyOptions: (options) => {
-                let {
-                    result, data
-                } = produce({
-                    a: 1
-                });
+let captureCallback = null;
 
-                options.id = data.id;
+let {
+    proxyAjax
+} = ajaxproxy();
 
-                callback(result);
+let {
+    produce, consume
+} = messageQueue();
 
-                // send point
-                return options;
-            },
+let rootCache = [];
 
-            proxyResponse: (response, options) => {
-                consume({
-                    id: options.id,
-                    data: {
-                        options,
-                        response
-                    }
-                });
-                return response;
+proxyAjax({
+    xhr: {
+        proxyOptions: (options) => {
+            let {
+                result, data
+            } = produce({
+                a: 1
+            });
+
+            options.id = data.id;
+
+            if (!captureCallback) {
+                rootCache.push(result);
+            } else {
+                captureCallback(result);
             }
+
+            // send point
+            return options;
+        },
+
+        proxyResponse: (response, options) => {
+            consume({
+                id: options.id,
+                data: {
+                    options,
+                    response
+                }
+            });
+            return response;
         }
-    });
+    }
+});
+
+
+module.exports = (callback) => {
+    if (!captureCallback) {
+        captureCallback = callback;
+
+        forEach(rootCache, (result) => {
+            captureCallback(result);
+        });
+    } else {
+        captureCallback = callback;
+    }
 };
