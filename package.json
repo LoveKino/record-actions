@@ -33,6 +33,7 @@
         "ajaxproxy": "~0.0.1",
         "consume-queue": "~0.0.1",
         "idgener": "~0.0.1",
-        "jsenhance": "~0.0.1"
+        "jsenhance": "~0.0.1",
+        "ajaxtamper": "~0.0.1"
     }
 }

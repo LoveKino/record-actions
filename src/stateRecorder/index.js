@@ -1,7 +1,7 @@
 'use strict';
 
 let PageStateRecorder = require('./page');
-let AjaxRecorder = require('./ajax');
+let Ajaxtamper = require('ajaxtamper').recordPlugin;
 
 let {
     map
@@ -10,6 +10,6 @@ let {
 module.exports = () => {
     return map([
         PageStateRecorder,
-        AjaxRecorder
+        Ajaxtamper
     ], (high) => high());
 };
