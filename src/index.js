@@ -8,17 +8,14 @@
  *
  *      system response
  */
-
-let PageStateRecorder = require('./stateRecorder/page');
-let AjaxRecorder = require('./stateRecorder/ajax');
-
 let Recorder = require('./recorder');
 
 let idgener = require('idgener');
 
+let stateRecorder = require('./stateRecorder');
+
 module.exports = () => {
-    let pageStateRecorder = PageStateRecorder();
-    let ajaxRecorder = AjaxRecorder();
+    let plugins = stateRecorder();
 
     return ({
         winId,
@@ -48,10 +45,7 @@ module.exports = () => {
 
         let {
             record, stop
-        } = Recorder([
-            pageStateRecorder,
-            ajaxRecorder
-        ], recordInfoStore, {
+        } = Recorder(plugins, recordInfoStore, {
             refreshId,
             playedTime,
             winId,
