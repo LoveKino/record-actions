@@ -9,27 +9,16 @@
  *      system response
  */
 
-let ActionCapturer = require('capture-action');
+let PageStateRecorder = require('./stateRecorder/page');
+let AjaxRecorder = require('./stateRecorder/ajax');
 
-let recordState = require('./recordState');
+let Recorder = require('./recorder');
 
-let RecordAjax = require('./recordAjax');
+let idgener = require('idgener');
 
-let RecordStore = require('./recordStore');
-
-let NodeUnique = require('./nodeUique');
-
-let {
-    genId
-} = require('./util');
-
-module.exports = ({
-    doRecordAjax = true
-} = {}) => {
-    let recordAjax = null;
-    if (doRecordAjax) {
-        recordAjax = RecordAjax();
-    }
+module.exports = () => {
+    let pageStateRecorder = PageStateRecorder();
+    let ajaxRecorder = AjaxRecorder();
 
     return ({
         winId,
@@ -43,74 +32,40 @@ module.exports = ({
         const pageInfoKey = `${rootId}-pageInfo`;
 
         // get current page's refreshId
-        refreshId = refreshId || genId();
+        refreshId = refreshId || idgener();
 
-        let nodeUnique = NodeUnique();
+        let recordInfoStore = {
+            get: () => memory.get(pageInfoKey).then(list => {
+                return list || {
+                    nodes: []
+                };
+            }),
 
-        let record = ({
-            addAction,
-            updateState,
-            updateAjaxExternal
-        }, actionConfig) => {
-            let {
-                capture
-            } = ActionCapturer(actionConfig);
+            set: (list) => memory.set(pageInfoKey, list),
 
-            let accept = (action, event) => {
-                // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
-                updateState(recordState.getPageState(), 'beforeRecordAction');
-                // node flag
-                let id = nodeUnique(event.target);
-
-                action.source.domNodeId = id;
-
-                // add action
-                addAction(action);
-            };
-
-            // TODO using observable
-            recordState.start(50, updateState, 'regular');
-
-            // recording ajax
-            recordAjax && recordAjax(updateAjaxExternal);
-
-            capture(accept);
+            remove: () => memory.remove(pageInfoKey)
         };
 
-        let stop = () => {
-            // save current state
-            return getStore().then(({
-                updateState
-            }) => {
-                return updateState(recordState.getPageState(), 'closeWindow');
-            });
-        };
-
-        let getStore = () => RecordStore(memory, pageInfoKey, {
-            winId,
-            continueWinId,
+        let {
+            record, stop
+        } = Recorder([
+            pageStateRecorder,
+            ajaxRecorder
+        ], recordInfoStore, {
+            refreshId,
             playedTime,
-            refreshId
+            winId,
+            continueWinId
         });
 
-        let getRecordData = () => {
-            // get history
-            return getStore().then((store) => {
-                return store.getRecordData();
-            });
-        };
-
-        let clearRecordData = () => {
-            return memory.remove(pageInfoKey);
-        };
-
-        let start = () => getStore().then((store) => record(store, passData.config.action));
-
         return {
-            start,
+            start: () => record(passData.config.action),
+
             stop,
-            getRecordData,
-            clearRecordData
+
+            clearRecordData: () => recordInfoStore.remove(),
+
+            getRecordData: () => recordInfoStore.get(),
         };
     };
 };

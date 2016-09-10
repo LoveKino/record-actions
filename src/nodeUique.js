@@ -1,8 +1,6 @@
 'use strict';
 
-let {
-    genId
-} = require('./util');
+let idgener = require('idgener');
 
 let {
     find
@@ -21,7 +19,7 @@ module.exports = () => {
         });
         if (ret) return ret[1];
 
-        let id = genId();
+        let id = idgener();
         cacheMap.push([node, id]);
         return id;
     };
