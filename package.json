@@ -33,5 +33,8 @@
     "mirrorproxy": "0.0.1",
     "page-queue-model": "0.0.1",
     "serialize-front": "0.0.1"
+  },
+  "devDependencies": {
+    "webpack": "^1.13.2"
   }
 }

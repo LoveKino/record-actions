@@ -4,35 +4,44 @@ let addPageState = require('./addPageState');
 
 module.exports = () => {
     return {
-        startRecording: (recordInfo, recordState, {
+        startRecording: ({
             refreshId,
             winId,
             continueWinId
+        }, {
+            updateRecordInfo
         }) => {
             // TODO using observable
             setInterval(() => {
+                updateRecordInfo((recordInfo) => {
+                    addPageState(recordInfo, {
+                        moment: 'regular',
+                        refreshId,
+                        winId,
+                        continueWinId
+                    });
+                    return recordInfo;
+                });
+            }, 50);
+        },
+
+        // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
+        beforeAddAction: ({
+            refreshId,
+            winId,
+            continueWinId
+        }, {
+            updateRecordInfo
+        }) => {
+            updateRecordInfo((recordInfo) => {
                 addPageState(recordInfo, {
-                    moment: 'regular',
+                    moment: 'beforeRecordAction',
                     refreshId,
                     winId,
                     continueWinId
                 });
 
-                recordState && recordState();
-            }, 50);
-        },
-
-        // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
-        beforeAddAction: (recordInfo, {
-            refreshId,
-            winId,
-            continueWinId
-        }) => {
-            addPageState(recordInfo, {
-                moment: 'beforeRecordAction',
-                refreshId,
-                winId,
-                continueWinId
+                return recordInfo;
             });
         },
 
