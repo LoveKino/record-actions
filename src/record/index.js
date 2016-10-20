@@ -9,9 +9,8 @@ let nodeUnique = NodeUnique();
 let completeActionInfo = (action, {
     winId,
     continueWinId,
-    refreshId,
-    event
-}) => {
+    refreshId
+}, event) => {
     // node flag
     let id = nodeUnique(event.target);
     action.source.domNodeId = id;
@@ -29,25 +28,15 @@ let completeActionInfo = (action, {
 
 /**
  * @param actionConfig
- * @param opts
+ * @param options
  * @param callbacks
  */
-module.exports = (actionConfig, {
-    refreshId,
-    playedTime,
-    winId,
-    continueWinId
-}, {
+module.exports = (actionConfig, options, {
     receiveAction,
     startRecording,
     beforeAddAction
 }) => {
-    startRecording({
-        refreshId,
-        playedTime,
-        winId,
-        continueWinId
-    });
+    startRecording();
 
     let {
         capture
@@ -55,19 +44,9 @@ module.exports = (actionConfig, {
 
     let accept = (action, event) => {
         // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
-        return beforeAddAction({
-            refreshId,
-            playedTime,
-            winId,
-            continueWinId
-        }).then(() => {
+        return beforeAddAction().then(() => {
             // compelete action info
-            completeActionInfo(action, {
-                winId,
-                continueWinId,
-                refreshId,
-                event
-            });
+            completeActionInfo(action, options, event);
 
             // add action
             return receiveAction(action);

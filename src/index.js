@@ -27,51 +27,36 @@ let Store = require('./store');
 module.exports = () => {
     let plugins = stateRecorder();
 
-    return ({
-        winId,
-        rootId,
-        refreshId,
-        passData,
-        memory,
-        playedTime,
-        continueWinId
-    }) => {
+    return (options) => {
+        // get current page's refreshId
+        options.refreshId = options.refreshId || idgener();
+        let {
+            rootId, passData, playedTime
+        } = options;
+
         const pageInfoKey = `${rootId}-pageInfo`;
 
+        let store = null;
         let {
             clearRecordData,
             getRecordData,
-            updateRecordInfo,
-            receiveAction,
-            receiveState
-        } = Store(memory, {
+            receiveAction
+        } = store = Store(options.memory, {
             pageInfoKey, playedTime
         });
 
-        // get current page's refreshId
-        refreshId = refreshId || idgener();
-
-        let store = {
-            updateRecordInfo,
-            receiveState
-        };
-
         let start = () => {
-            return record(passData.config.action, {
-                refreshId,
-                playedTime,
-                winId,
-                continueWinId
-            }, {
-                startRecording: (opts) => {
+            return record(passData.config.action, options, {
+                startRecording: () => {
                     return runSequence(map(plugins, (plugin) => plugin.startRecording), [
-                        opts, store
+                        options, store
                     ]);
                 },
 
-                beforeAddAction: (opts) => {
+                beforeAddAction: () => {
                     return runSequence(map(plugins, (plugin) => plugin.beforeAddAction), [
-                        opts, store
+                        options,
+                        store
                     ]);
                 },
 
@@ -84,12 +69,7 @@ module.exports = () => {
             getRecordData,
             start,
             stop: () => {
-                let opts = {
-                    refreshId,
-                    winId,
-                    continueWinId
-                };
-                return runSequence(map(plugins, (plugin) => plugin.stopRecording), [opts, store]);
+                return runSequence(map(plugins, (plugin) => plugin.stopRecording), [options, store]);
             }
         };
     };
