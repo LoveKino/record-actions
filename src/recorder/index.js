@@ -12,6 +12,31 @@ let {
     map
 } = require('bolzano');
 
+let NodeUnique = require('./nodeUique');
+
+let nodeUnique = NodeUnique();
+
+let completeActionInfo = (action, {
+    winId,
+    continueWinId,
+    refreshId,
+    event
+}) => {
+    // node flag
+    let id = nodeUnique(event.target);
+    action.source.domNodeId = id;
+
+    winId = continueWinId || winId;
+    // type
+    action.type = 'action';
+
+    // tag refreshId
+    action.refreshId = refreshId;
+
+    // tag winId
+    action.winId = winId;
+};
+
 module.exports = (plugins, recordInfoStore, {
     refreshId,
     playedTime,
@@ -44,13 +69,17 @@ module.exports = (plugins, recordInfoStore, {
                     continueWinId
                 }]);
 
-                // add action
-                addAction(action, recordInfo, {
-                    refreshId,
-                    playedTime,
+                // compelete action info
+                completeActionInfo(action, {
                     winId,
                     continueWinId,
+                    refreshId,
                     event
+                });
+
+                // add action
+                addAction(action, recordInfo, {
+                    playedTime
                 });
 
                 // save

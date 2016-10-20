@@ -2,32 +2,9 @@
 
 let processor = require('./processor');
 
-let NodeUnique = require('./nodeUique');
-
-let nodeUnique = NodeUnique();
-
 module.exports = (action, list, {
-    refreshId,
-    playedTime,
-    winId,
-    continueWinId,
-    event
+    playedTime
 }) => {
-    // node flag
-    let id = nodeUnique(event.target);
-
-    action.source.domNodeId = id;
-
-    winId = continueWinId || winId;
-    // type
-    action.type = 'action';
-
-    // tag refreshId
-    action.refreshId = refreshId;
-
-    // tag winId
-    action.winId = winId;
-
     // tag gap time
     let prev = getLastActionNode(list);
 
