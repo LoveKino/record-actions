@@ -23,7 +23,7 @@
   "homepage": "https://github.com/LoveKino/record-actions#readme",
   "dependencies": {
     "ajaxproxy": "0.0.1",
-    "ajaxtamper": "0.0.2",
+    "ajaxtamper": "0.0.3",
     "bolzano": "0.0.1",
     "capture-action": "0.0.1",
     "cl-jsoneq": "0.0.2",
