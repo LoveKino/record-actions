@@ -1,7 +1,6 @@
 'use strict';
 
 /**
- *
  * information
  *
  *      user action
@@ -22,28 +21,21 @@ let {
     map
 } = require('bolzano');
 
-let Store = require('./store');
-
 module.exports = () => {
     let plugins = stateRecorder();
 
-    return (options) => {
+    return (options, store) => {
         // get current page's refreshId
         options.refreshId = options.refreshId || idgener();
         let {
-            rootId, passData, playedTime
+            passData
         } = options;
 
-        const pageInfoKey = `${rootId}-pageInfo`;
-
-        let store = null;
         let {
             clearRecordData,
             getRecordData,
             receiveAction
-        } = store = Store(options.memory, {
-            pageInfoKey, playedTime
-        });
+        } = store;
 
         let start = () => {
             return record(passData.config.action, options, {

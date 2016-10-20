@@ -20,7 +20,7 @@ module.exports = () => {
                     winId,
                     continueWinId
                 });
-            }, 50);
+            }, 100);
         },
 
         // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
