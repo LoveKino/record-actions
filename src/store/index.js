@@ -8,6 +8,8 @@ module.exports = (memory, {
     pageInfoKey,
     playedTime
 }) => {
+    let updateTasks = Promise.resolve();
+
     let get = () => memory.get(pageInfoKey).then(list => {
         return list || {
             nodes: []
@@ -21,14 +23,20 @@ module.exports = (memory, {
     /**
      * get recordInfo, modify it and save the result as a new recordInfo
      *
+     * must wait for the lastest update job finished
+     *
      * @param modify
      *      recordInfo -> recordInfo
      */
     let updateRecordInfo = (modify) => {
-        return get().then((recordInfo) => {
-            let newRecordInfo = modify(recordInfo);
-            if (!newRecordInfo) return null;
-            return set(newRecordInfo);
+        return new Promise((resolve, reject) => {
+            updateTasks = updateTasks.then(() => {
+                return get().then((recordInfo) => {
+                    let newRecordInfo = modify(recordInfo);
+                    if (!newRecordInfo) return null;
+                    return set(newRecordInfo);
+                }).then(resolve).catch(reject);
+            });
         });
     };
 
