@@ -55,23 +55,23 @@ module.exports = (actionConfig, {
 
     let accept = (action, event) => {
         // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
-        beforeAddAction({
+        return beforeAddAction({
             refreshId,
             playedTime,
             winId,
             continueWinId
-        });
+        }).then(() => {
+            // compelete action info
+            completeActionInfo(action, {
+                winId,
+                continueWinId,
+                refreshId,
+                event
+            });
 
-        // compelete action info
-        completeActionInfo(action, {
-            winId,
-            continueWinId,
-            refreshId,
-            event
+            // add action
+            return receiveAction(action);
         });
-
-        // add action
-        receiveAction(action);
     };
 
     capture(accept);

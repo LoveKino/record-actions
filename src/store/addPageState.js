@@ -1,15 +1,14 @@
 'use strict';
 
 let jsoneq = require('cl-jsoneq');
-let getPageState = require('./getPageState');
 
 module.exports = (recordInfo, {
+    state,
     moment,
     refreshId,
     winId,
     continueWinId
 }) => {
-    let state = getPageState();
     winId = continueWinId || winId;
     let last = recordInfo.nodes[recordInfo.nodes.length - 1];
 

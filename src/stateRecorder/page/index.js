@@ -1,6 +1,6 @@
 'use strict';
 
-let addPageState = require('./addPageState');
+let getPageState = require('./getPageState');
 
 module.exports = () => {
     return {
@@ -9,18 +9,16 @@ module.exports = () => {
             winId,
             continueWinId
         }, {
-            updateRecordInfo
+            receiveState
         }) => {
             // TODO using observable
             setInterval(() => {
-                updateRecordInfo((recordInfo) => {
-                    addPageState(recordInfo, {
-                        moment: 'regular',
-                        refreshId,
-                        winId,
-                        continueWinId
-                    });
-                    return recordInfo;
+                receiveState({
+                    state: getPageState(),
+                    moment: 'regular',
+                    refreshId,
+                    winId,
+                    continueWinId
                 });
             }, 50);
         },
@@ -31,27 +29,26 @@ module.exports = () => {
             winId,
             continueWinId
         }, {
-            updateRecordInfo
+            receiveState
         }) => {
-            updateRecordInfo((recordInfo) => {
-                addPageState(recordInfo, {
-                    moment: 'beforeRecordAction',
-                    refreshId,
-                    winId,
-                    continueWinId
-                });
-
-                return recordInfo;
+            return receiveState({
+                state: getPageState(),
+                moment: 'beforeRecordAction',
+                refreshId,
+                winId,
+                continueWinId
             });
         },
 
-        stopRecording: (recordInfo, {
+        stopRecording: ({
             refreshId,
             winId,
             continueWinId
+        }, {
+            receiveState
         }) => {
-            // save current state
-            addPageState(recordInfo, {
+            return receiveState({
+                state: getPageState(),
                 moment: 'closewindow',
                 refreshId,
                 winId,

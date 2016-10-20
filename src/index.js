@@ -14,8 +14,6 @@ let idgener = require('idgener');
 
 let stateRecorder = require('./stateRecorder');
 
-let addAction = require('./addAction');
-
 let {
     runSequence
 } = require('jsenhance');
@@ -23,6 +21,8 @@ let {
 let {
     map
 } = require('bolzano');
+
+let Store = require('./store');
 
 module.exports = () => {
     let plugins = stateRecorder();
@@ -38,33 +38,22 @@ module.exports = () => {
     }) => {
         const pageInfoKey = `${rootId}-pageInfo`;
 
+        let {
+            clearRecordData,
+            getRecordData,
+            updateRecordInfo,
+            receiveAction,
+            receiveState
+        } = Store(memory, {
+            pageInfoKey, playedTime
+        });
+
         // get current page's refreshId
         refreshId = refreshId || idgener();
 
-        let recordInfoStore = {
-            get: () => memory.get(pageInfoKey).then(list => {
-                return list || {
-                    nodes: []
-                };
-            }),
-
-            set: (list) => memory.set(pageInfoKey, list),
-
-            remove: () => memory.remove(pageInfoKey)
-        };
-
-        /**
-         * get recordInfo, modify it and save the result as a new recordInfo
-         *
-         * @param modify
-         *      recordInfo -> recordInfo
-         */
-        let updateRecordInfo = (modify) => {
-            return recordInfoStore.get().then((recordInfo) => {
-                let newRecordInfo = modify(recordInfo);
-                if (!newRecordInfo) return null;
-                return recordInfoStore.set(newRecordInfo);
-            });
+        let store = {
+            updateRecordInfo,
+            receiveState
         };
 
         let start = () => {
@@ -74,48 +63,33 @@ module.exports = () => {
                 winId,
                 continueWinId
             }, {
-                receiveAction: (action) => {
-                    updateRecordInfo((recordInfo) => {
-                        addAction(action, recordInfo, {
-                            playedTime
-                        });
-                        return recordInfo;
-                    });
-                },
-
                 startRecording: (opts) => {
-                    runSequence(map(plugins, (plugin) => plugin.startRecording), [
-                        opts, {
-                            updateRecordInfo
-                        }
+                    return runSequence(map(plugins, (plugin) => plugin.startRecording), [
+                        opts, store
                     ]);
                 },
 
                 beforeAddAction: (opts) => {
-                    runSequence(map(plugins, (plugin) => plugin.beforeAddAction), [
-                        opts, {
-                            updateRecordInfo
-                        }
+                    return runSequence(map(plugins, (plugin) => plugin.beforeAddAction), [
+                        opts, store
                     ]);
-                }
+                },
+
+                receiveAction
             });
         };
 
         return {
-            clearRecordData: () => recordInfoStore.remove(),
-
-            getRecordData: () => recordInfoStore.get(),
+            clearRecordData,
+            getRecordData,
             start,
-
             stop: () => {
-                return recordInfoStore.get().then((recordInfo) => {
-                    runSequence(map(plugins, (plugin) => plugin.stopRecording), [recordInfo, {
-                        refreshId,
-                        winId,
-                        continueWinId
-                    }]);
-                    return recordInfoStore.set(recordInfo);
-                });
+                let opts = {
+                    refreshId,
+                    winId,
+                    continueWinId
+                };
+                return runSequence(map(plugins, (plugin) => plugin.stopRecording), [opts, store]);
             }
         };
     };
