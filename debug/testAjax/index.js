@@ -17,13 +17,33 @@ let {
                 ]
             }
         }
-    },
-    winId: 1
+    }
 }, {
     receiveState: () => {},
     receiveAction: (action) => {
         log(action);
+    },
+    receiveAjax: (ajax) => {
+        log(ajax);
     }
 });
 
 start();
+
+let sendAjax = () => {
+    // send ajax
+    let xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+            //
+        }
+    };
+
+    xhr.open('GET', window.location.href);
+    xhr.send();
+};
+
+sendAjax();
+
+document.getElementById('test').addEventListener('click', sendAjax);

@@ -7,11 +7,11 @@
  *
  *      system response
  */
-let record = require('./record');
+let stateRecorder = require('./stateRecorder');
+
+let ActionCapturer = require('capture-action');
 
 let idgener = require('idgener');
-
-let stateRecorder = require('./stateRecorder');
 
 let {
     runSequence
@@ -21,9 +21,44 @@ let {
     map
 } = require('bolzano');
 
+/**
+ * @param actionConfig
+ * @param options
+ * @param callbacks
+ */
+let record = (actionConfig, options, {
+    receiveAction,
+    startRecording,
+    beforeAddAction
+}) => {
+    startRecording();
+
+    let {
+        capture
+    } = ActionCapturer(actionConfig);
+
+    let accept = (action) => {
+        // at this moment, the event handlers still not triggered, but UI may changed (like scroll, user input)
+        return beforeAddAction().then(() => {
+            return receiveAction(action);
+        });
+    };
+
+    capture(accept);
+};
+
 module.exports = () => {
     let plugins = stateRecorder();
-
+    /**
+     * @param options
+     * @param store
+     *      clearRecordData
+     *      getRecordData
+     *      receiveAction
+     *      receiveState
+     *      receiveAjax
+     *      ...
+     */
     return (options, store) => {
         // get current page's refreshId
         options.refreshId = options.refreshId || idgener();
@@ -32,8 +67,6 @@ module.exports = () => {
         } = options;
 
         let {
-            clearRecordData,
-            getRecordData,
             receiveAction
         } = store;
 
@@ -57,12 +90,11 @@ module.exports = () => {
         };
 
         return {
-            clearRecordData,
-            getRecordData,
             start,
             stop: () => {
                 return runSequence(map(plugins, (plugin) => plugin.stopRecording), [options, store]);
             }
         };
     };
+
 };
